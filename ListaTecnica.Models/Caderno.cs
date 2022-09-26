@@ -30,7 +30,8 @@ namespace ListaTecnica.Models
         public double KgBrutoP { get; set; }
         public double KgBrutoN { get; set; }
 
-        public Caderno(int id, string nomeCaderno, int tiragem, int qtdPaginas, int exsPorGiro, string tipoDePapel, int gramatura, int bobina, int cutoffP, int cutoffN, int desperdicioAcerto, double desperdicioImpressaoP, double desperdicioImpressaoN, double desperdicioAcabamentoP, double desperdicioAcabamentoN, double kgLiquido, double unitarioLiquido, double unitarioBruto, double kgBrutoP, double kgBrutoN)
+
+        public Caderno(int id, string nomeCaderno, int tiragem, int qtdPaginas, int exsPorGiro, string tipoDePapel, int gramatura, int bobina, int cutoffP, double unitarioLiquido, double unitarioBruto, double kgBrutoP, double kgBrutoN)
         {
             Id = id;
             NomeCaderno = nomeCaderno;
@@ -41,22 +42,38 @@ namespace ListaTecnica.Models
             Gramatura = gramatura;
             Bobina = bobina;
             CutoffP = cutoffP;
-            CutoffN = cutoffN;
+            CutoffN = CutoffCliente();
             DesperdicioAcerto = DesperdicioDeAcerto();
             DesperdicioImpressaoP = DesperdicioDeImpressaoP();
-            DesperdicioImpressaoN = desperdicioImpressaoN;
-            DesperdicioAcabamentoP = desperdicioAcabamentoP;
-            DesperdicioAcabamentoN = desperdicioAcabamentoN;
-            KgLiquido = kgLiquido;
-            UnitarioLiquido = unitarioLiquido;
-            UnitarioBruto = unitarioBruto;
-            KgBrutoP = kgBrutoP;
-            KgBrutoN = kgBrutoN;
+            DesperdicioImpressaoN = DesperdicioDeImpressaoN();
+            DesperdicioAcabamentoP = DesperdicioDeAcabamentoP();
+            DesperdicioAcabamentoN = DesperdicioDeAcabamentoN();
+            KgLiquido = KgsLiquido();
+            UnitarioLiquido = UnitarioLiquidoKg();
+            UnitarioBruto = UnitarioBrutoKg();
+            KgBrutoP = TotalKgBrutoP();
+            KgBrutoN = TotalKgBrutoN();
         }
 
-        private int DesperdicioDeAcerto()
+        private int CutoffCliente()
         {
-            //=SE(B5<25000;(27000-B5)/M5;PROCV(L5;'Desp. Plural'!$D$7:$F$29;3;0))
+            if (CutoffP == 584)
+            {
+                return 584;
+            }
+            else if (CutoffP == 546)
+            {
+                return 575;
+            }
+            else
+            {
+                return 578;
+            }
+        }
+
+        public int DesperdicioDeAcerto()
+        {
+
             if (Tiragem < 25000)
             {
                 return (27000 - Tiragem) / ExsPorGiro;
@@ -64,15 +81,131 @@ namespace ListaTecnica.Models
             return 2000;
         }
 
-        private double DesperdicioDeImpressaoP()
+        public double DesperdicioDeImpressaoP()
         {
             double percentualCadernoPadrao = 0.0;
 
-            //tentar um switch case
+            if (Bobina > 730)
+            {
+                percentualCadernoPadrao = 0.08;
+            }
+            else
+            {
+                percentualCadernoPadrao = 0.06;
+            }
 
             return percentualCadernoPadrao;
         }
 
+        public double DesperdicioDeImpressaoN()
+        {
+            if (Tiragem < 25000)
+            {
+                return DesperdicioDeImpressaoP();
+            }
+            else
+            {
+                return 0.04;
+            }
+        }
+
+        public double DesperdicioDeAcabamentoP()
+        {
+            if (Tiragem < 25000)
+            {
+                return 900 / Tiragem;
+            }
+            else
+            {
+                return 0.02;
+            }
+        }
+
+
+        #region teste outra forma de calcular o desperdicio acabamentoP
+        //public double DesperdicioDeAcabamentoP(double refile, double acbto1, double acbto2, double acbto3, double acbto4)
+        //{
+
+        //    double desperdicioTotal = 0.02 + refile + acbto1 + acbto2 + acbto3 + acbto4;
+
+
+        //    if (Tiragem < 25000 && refile == 0)
+        //    {
+        //        desperdicioTotal = (300 / Tiragem);
+
+        //        return desperdicioTotal;
+        //    }
+        //    else if (Tiragem < 25000)
+        //    {
+        //        desperdicioTotal = (900 / Tiragem);
+
+        //        return desperdicioTotal;
+        //    }
+        //    else
+        //    {
+        //        return desperdicioTotal;
+        //    }
+        //}
+        #endregion
+
+
+        public double DesperdicioDeAcabamentoN()
+        {
+            if (Tiragem < 25000)
+            {
+                return DesperdicioDeAcabamentoP();
+            }
+            else
+            {
+                return 0.04;
+            }
+        }
+
+        #region teste outra forma de calcular o desperdicio acabamentoN
+        //public double DesperdicioDeAcabamentoN(double refile, double acbto1, double acbto2, double acbto3, double acbto4)
+        //{
+
+        //    double desperdicioTotal = 0.04 + acbto1 + acbto2 + acbto3 + (acbto4 + 1.5);
+
+        //    if (Tiragem < 25000)
+        //    {
+        //        return DesperdicioDeAcabamentoP(refile, acbto1, acbto2, acbto3, acbto4);
+        //    }
+        //    else
+        //    {
+        //        return desperdicioTotal;
+        //    }
+
+
+        //}
+        #endregion
+
+        public double KgsLiquido()
+        {
+            double resultado = (Bobina / 1000) * (CutoffN / 1000) * (Gramatura / 1000) * (Tiragem / 1000);
+
+            return resultado;
+        }
+
+        public double UnitarioLiquidoKg()
+        {
+            return KgsLiquido() / Tiragem;
+        }
+
+        public double UnitarioBrutoKg()
+        {
+            return 0.0;
+        }
+
+        public double TotalKgBrutoP()
+        {
+            return ((Tiragem / ExsPorGiro) * (1.0 + DesperdicioDeAcabamentoP()) * (1.0 + DesperdicioDeImpressaoP()) + DesperdicioDeAcerto())*((CutoffP/1000) * (Bobina /1000) * (Gramatura / 1000));
+        }
+
+        public double TotalKgBrutoN()
+        {
+            return ((Tiragem / ExsPorGiro) * (1.0 + DesperdicioDeAcabamentoN()) * (1.0 + DesperdicioDeImpressaoN()) + DesperdicioDeAcerto()) * ((CutoffN / 1000) * (Bobina / 1000) * (Gramatura / 1000));
+        }
 
     }
 }

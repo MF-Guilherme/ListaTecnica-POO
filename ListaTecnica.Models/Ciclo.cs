@@ -12,6 +12,12 @@ namespace ListaTecnica.Models
         public string Campanha { get; set; }
         public List<Produto> Produtos { get; set; }
 
+        public Ciclo(int id, string campanha)
+        {
+            Id = id;
+            Campanha = campanha;
+        }
+
         public Ciclo(int id, string campanha, List<Produto> produtos)
         {
             Id = id;

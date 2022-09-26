@@ -1,7 +1,7 @@
 ﻿
 namespace ListaTecnica
 {
-    partial class PrincipalForm
+    partial class ListaTecnicaForm
     {
         /// <summary>
         /// Required designer variable.

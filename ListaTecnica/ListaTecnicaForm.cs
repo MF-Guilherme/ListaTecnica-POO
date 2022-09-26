@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace ListaTecnica
 {
-    public partial class PrincipalForm : Form
+    public partial class ListaTecnicaForm : Form
     {
-        public PrincipalForm()
+        public ListaTecnicaForm()
         {
             InitializeComponent();
         }
